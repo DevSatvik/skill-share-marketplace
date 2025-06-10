@@ -5,6 +5,16 @@ import requireRole from "../middleware/role.middleware.js";
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/tasks/{id}/progress:
+ *   post:
+ *     summary: Add progress update (Provider only)
+ *     tags: [TaskProgress]
+ *     security:
+ *       - bearerAuth: []
+ */
+
 router.post(
   "/tasks/:id/progress",
   authenticate,
@@ -12,11 +22,20 @@ router.post(
   addTaskProgress
 );
 
+/**
+ * @swagger
+ * /api/tasks/{id}/progress:
+ *   get:
+ *     summary: Get progress for a task
+ *     tags: [TaskProgress]
+ *     security:
+ *       - bearerAuth: []
+ */
+
 router.get(
     "/tasks/:id/progress", 
     authenticate, 
     getTaskProgress
 );
-
 
 export default router;
