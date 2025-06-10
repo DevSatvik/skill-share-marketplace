@@ -13,3 +13,155 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+// ----------------------------------
+// ENUMS: Used for strict field types
+// ----------------------------------
+
+enum Audience {
+  USER
+  PROVIDER
+}
+
+enum AudienceType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum TaskCategory {
+  GARDENING
+  CLEANING
+  TUTORING
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum WorkNature {
+  ONSITE
+  ONLINE
+}
+
+enum Currency {
+  USD
+  AUD
+  SGD
+  INR
+}
+
+// ----------------------------------
+// MAIN Entity: ACCOUNT
+// ----------------------------------
+
+model Account {
+  id           Int      @id @default(autoincrement())
+  role         Audience
+  email        String   @unique
+  password     String
+  mobileNumber String
+
+  // Individual or Company
+  type AudienceType
+
+  // Individual details  
+  firstName String?
+  lastName  String?
+
+  // Company details
+  companyName        String?
+  companyPhoneNumber String?
+  taxID              String? @db.VarChar(10)
+  repFirstName       String?
+  repLastName        String?
+
+  // Address details 
+  // optional: Company
+  // mandatory: Individual
+  addressStreetNumber String?
+  addressStreetName   String?
+  addressCitySuburb   String?
+  addressState        String?
+  addressPostcode     String?
+
+  // Authentication
+  authToken String? @unique // simple token-based auth
+
+  tasks        Task[]         @relation("PostedTasks")
+  skills       Skill[]
+  offers       Offer[]
+  taskProgress TaskProgress[]
+}
+
+// ----------------------------------
+// TASK: Posted only by USER Accounts
+// ----------------------------------
+
+model Task {
+  id                Int          @id @default(autoincrement())
+  accountId         Int
+  category          TaskCategory
+  taskName          String
+  taskDescription   String
+  expectedStartDate DateTime
+  expectedHours     Int
+  hourlyRate        Float
+  currency          Currency
+
+  completed Boolean @default(false)
+  providerMarkedComplete   Boolean  @default(false) 
+  userAcceptedCompletion   Boolean? // null → pending, true → accepted, false → rejected
+
+
+  account      Account         @relation("PostedTasks", fields: [accountId], references: [id])
+  offers       Offer[]
+  taskProgress TaskProgress[]
+}
+
+// ----------------------------------
+// SKILL: Skills offered by PROVIDER Accounts
+// ----------------------------------
+
+model Skill {
+  id              Int          @id @default(autoincrement())
+  accountId       Int
+  category        TaskCategory
+  experienceYears Int
+  workNature      WorkNature
+  hourlyRate      Float
+  currency        Currency
+
+  account Account @relation(fields: [accountId], references: [id])
+}
+
+// ----------------------------------
+// OFFER: Offers made by PROVIDER Accounts on USER Tasks
+// ----------------------------------
+
+model Offer {
+  id        Int    @id @default(autoincrement())
+  taskId    Int
+  accountId Int
+  status OfferStatus @default(PENDING)
+
+  task    Task    @relation(fields: [taskId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+}
+
+// ----------------------------------
+// TASK PROGRESS: Progress updates on Tasks by PROVIDER Accounts
+// ----------------------------------
+
+model TaskProgress {
+  id                  Int      @id @default(autoincrement())
+  taskId              Int
+  accountId           Int
+  progressDescription String
+  timestamp           DateTime @default(now())
+
+  task    Task    @relation(fields: [taskId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+}
