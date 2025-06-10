@@ -1,4 +1,4 @@
-import { prisma } from "../db/db.config.js";
+import prisma  from "../db/db.config.js";
 
 
 export const authenticate = async (req, res, next) => {
