@@ -28,7 +28,7 @@ export const createOffer = async (req, res) => {
     const offer = await prisma.offer.create({
       data: {
         taskId,
-        accountId: req.user.id, 
+        accountId: req.user.id,
         status: "PENDING",
       },
     });
@@ -43,8 +43,58 @@ export const createOffer = async (req, res) => {
   }
 };
 
+export const updateOfferStatus = async (req, res) => {
+  try {
+    const offerId = parseInt(req.params.id);
+    const action =
+      req.body?.action ||
+      (req.path.endsWith("/accept") ? "ACCEPT" : req.path.endsWith("/reject") ? "REJECT" : null);
+
+
+    if (!["ACCEPT", "REJECT"].includes(action)) {
+      return res.status(400).json({ error: "Action must be ACCEPT or REJECT" });
+    }
+
+    const offer = await prisma.offer.findUnique({
+      where: { id: offerId },
+      include: { task: true },
+    });
+
+    if (!offer) {
+      return res.status(404).json({ error: "Offer not found" });
+    }
+
+    if (offer.task.accountId !== req.user.id) {
+      return res.status(403).json({ error: "You do not own this task" });
+    }
+
+    if (offer.status !== "PENDING") {
+      return res
+        .status(400)
+        .json({ error: "Only PENDING offers can be accepted/rejected" });
+    }
+
+    const newStatus = action === "ACCEPT" ? "ACCEPTED" : "REJECTED";
+
+    const updatedOffer = await prisma.offer.update({
+      where: { id: offerId },
+      data: { status: newStatus },
+    });
+
+    res.json({
+      message: `Offer ${newStatus.toLowerCase()} successfully`,
+      offer: updatedOffer,
+    });
+  } catch (error) {
+    console.error("Update Offer Status error:", error);
+    res
+      .status(400)
+      .json({ error: error.message || "Failed to respond to offer" });
+  }
+};
+
 export const acceptOfferStatus = (req, res) => {
-  req.body = req.body || {}; 
+  req.body = req.body || {};
   req.body.action = "ACCEPT";
   return updateOfferStatus(req, res);
 };
