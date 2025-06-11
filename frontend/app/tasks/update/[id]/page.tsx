@@ -1,27 +1,21 @@
+// app/tasks/update/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import type { FC, FormEvent, ChangeEvent, JSX } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
-import type {
-  Task,
-  GetUserPostedTasksResponse,
-  CreateTaskPayload,
-} from "@/app/types/tasks";
+import type { Task, GetUserPostedTasksResponse, CreateTaskPayload } from "@/app/types/tasks";
 import type { Role } from "@/app/types/auth";
 
 const UpdateTaskPage: FC = (): JSX.Element => {
   const router = useRouter();
-  // const params = useParams();
-  // const taskId = params.id
   const { id: taskId } = useParams() as { id?: string };
-
   const axios = useAxios();
   const { authToken, role } = useAuth();
 
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<CreateTaskPayload>({
     category: "GARDENING",
     taskName: "",
     taskDescription: "",
@@ -30,22 +24,20 @@ const UpdateTaskPage: FC = (): JSX.Element => {
     hourlyRate: 0,
     currency: "USD",
   });
-
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     if (!authToken || !taskId) return;
-
-    const fetchTask = async () => {
+    const fetchTask = async (): Promise<void> => {
       try {
-        const response = await axios.get(`/tasks/user/posted`);
-        const task = response.data.tasks.find((t: Task) => t.id === parseInt(taskId!));
+        const res = await axios.get<GetUserPostedTasksResponse>("/tasks/user/posted");
+        const task = res.data.tasks.find((t: Task) => t.id === parseInt(taskId, 10));
         if (task) {
           setFormData({
             category: task.category,
             taskName: task.taskName,
             taskDescription: task.taskDescription,
-            expectedStartDate: task.expectedStartDate.split("T")[0], // date only
+            expectedStartDate: task.expectedStartDate.split("T")[0],
             expectedHours: task.expectedHours,
             hourlyRate: task.hourlyRate,
             currency: task.currency,
@@ -53,38 +45,41 @@ const UpdateTaskPage: FC = (): JSX.Element => {
         } else {
           setError("Task not found");
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Fetch Task error:", err);
         setError("Failed to load task");
       }
     };
-
     fetchTask();
   }, [authToken, axios, taskId]);
 
-  const handleChange = (e: any) => {
-    setFormData((prev: any) => ({
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ): void => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]:
+        name === "expectedHours"
+          ? parseInt(value, 10)
+          : name === "hourlyRate"
+          ? parseFloat(value)
+          : value,
     }));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError("");
-
     try {
-      await axios.patch(`/tasks/${taskId}`, {
+      await axios.patch<void>(`/tasks/${taskId}`, {
         ...formData,
         expectedStartDate: new Date(formData.expectedStartDate),
-        expectedHours: parseInt(formData.expectedHours),
-        hourlyRate: parseFloat(formData.hourlyRate),
       });
-
       router.push("/tasks/my-posted");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Update Task error:", err);
-      setError(err.response?.data?.error || "Failed to update task");
+      setError(err.response?.data?.error ?? "Failed to update task");
     }
   };
 
@@ -96,117 +91,151 @@ const UpdateTaskPage: FC = (): JSX.Element => {
     );
   }
 
+  if (role !== "USER") {
+    return (
+      <main className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
+        <div className="w-full max-w-md">
+          <p className="text-center text-red-500 text-lg">
+            You can only access this page as a User.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-50 p-6">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          Update Task #{taskId}
-        </h1>
+      <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+            Update Task #{taskId}
+          </h1>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                Category
+              </label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="GARDENING">Gardening</option>
+                <option value="CLEANING">Cleaning</option>
+                <option value="TUTORING">Tutoring</option>
+              </select>
+            </div>
 
-        {error && (
-          <p className="text-red-500 mb-4 text-center">{error}</p>
-        )}
+            <div>
+              <label htmlFor="taskName" className="block text-sm font-medium text-gray-700 mb-1">
+                Task Name
+              </label>
+              <input
+                id="taskName"
+                name="taskName"
+                type="text"
+                value={formData.taskName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label>Category:</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="border p-2 w-full"
+            <div>
+              <label htmlFor="taskDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                Task Description
+              </label>
+              <textarea
+                id="taskDescription"
+                name="taskDescription"
+                value={formData.taskDescription}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="expectedStartDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Expected Start Date
+              </label>
+              <input
+                id="expectedStartDate"
+                name="expectedStartDate"
+                type="date"
+                value={formData.expectedStartDate}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="expectedHours" className="block text-sm font-medium text-gray-700 mb-1">
+                Expected Hours
+              </label>
+              <input
+                id="expectedHours"
+                name="expectedHours"
+                type="number"
+                value={formData.expectedHours}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="hourlyRate" className="block text-sm font-medium text-gray-700 mb-1">
+                Hourly Rate
+              </label>
+              <input
+                id="hourlyRate"
+                name="hourlyRate"
+                type="number"
+                step="0.01"
+                value={formData.hourlyRate}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
+                Currency
+              </label>
+              <select
+                id="currency"
+                name="currency"
+                value={formData.currency}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="USD">USD</option>
+                <option value="AUD">AUD</option>
+                <option value="SGD">SGD</option>
+                <option value="INR">INR</option>
+              </select>
+            </div>
+
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
             >
-              <option value="GARDENING">GARDENING</option>
-              <option value="CLEANING">CLEANING</option>
-              <option value="TUTORING">TUTORING</option>
-            </select>
-          </div>
-
-          <div>
-            <label>Task Name:</label>
-            <input
-              type="text"
-              name="taskName"
-              value={formData.taskName}
-              onChange={handleChange}
-              required
-              className="border p-2 w-full"
-            />
-          </div>
-
-          <div>
-            <label>Task Description:</label>
-            <textarea
-              name="taskDescription"
-              value={formData.taskDescription}
-              onChange={handleChange}
-              required
-              className="border p-2 w-full"
-            ></textarea>
-          </div>
-
-          <div>
-            <label>Expected Start Date:</label>
-            <input
-              type="date"
-              name="expectedStartDate"
-              value={formData.expectedStartDate}
-              onChange={handleChange}
-              required
-              className="border p-2 w-full"
-            />
-          </div>
-
-          <div>
-            <label>Expected Hours:</label>
-            <input
-              type="number"
-              name="expectedHours"
-              value={formData.expectedHours}
-              onChange={handleChange}
-              required
-              className="border p-2 w-full"
-            />
-          </div>
-
-          <div>
-            <label>Hourly Rate:</label>
-            <input
-              type="number"
-              step="0.01"
-              name="hourlyRate"
-              value={formData.hourlyRate}
-              onChange={handleChange}
-              required
-              className="border p-2 w-full"
-            />
-          </div>
-
-          <div>
-            <label>Currency:</label>
-            <select
-              name="currency"
-              value={formData.currency}
-              onChange={handleChange}
-              className="border p-2 w-full"
-            >
-              <option value="USD">USD</option>
-              <option value="AUD">AUD</option>
-              <option value="SGD">SGD</option>
-              <option value="INR">INR</option>
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
-          >
-            Update Task
-          </button>
-        </form>
+              Update Task
+            </button>
+          </form>
+        </div>
       </div>
     </main>
   );
-}
+};
 
 export default UpdateTaskPage;

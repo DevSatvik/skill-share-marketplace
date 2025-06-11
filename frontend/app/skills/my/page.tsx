@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
+import { useRouter } from "next/navigation";
 
 export default function MySkillsPage() {
   const { authToken, role } = useAuth();
   const axios = useAxios();
+  const router = useRouter();
 
   const [skills, setSkills] = useState<any[]>([]);
   const [error, setError] = useState("");
@@ -75,6 +77,12 @@ export default function MySkillsPage() {
                     <strong>Hourly Rate:</strong> {skill.hourlyRate} {skill.currency}
                   </p>
                 </div>
+                <button
+                  onClick={() => router.push(`/skills/update/${skill.id}`)}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Edit
+                </button>
               </div>
             ))}
           </div>
