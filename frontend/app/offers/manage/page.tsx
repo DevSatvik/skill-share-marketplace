@@ -106,3 +106,5 @@ const ManageOffersPage: FC = (): JSX.Element => {
     </main>
   );
 }
+
+export default ManageOffersPage;

@@ -208,3 +208,5 @@ const UpdateTaskPage: FC = (): JSX.Element => {
     </main>
   );
 }
+
+export default UpdateTaskPage;

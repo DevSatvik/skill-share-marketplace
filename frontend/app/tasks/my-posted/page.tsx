@@ -15,6 +15,24 @@ export default function MyPostedTasksPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [error, setError] = useState("");
 
+  //   function handleMarkComplete(taskId: number) {
+  //   try {
+  //     axios.post(`/tasks/${taskId}/complete\``).then(fetchMyPostedTasks);
+  //   } catch (err) {
+  //     console.error("Mark Complete error:", err);
+  //     setError("Failed to mark task as complete");
+  //   }
+  // }
+
+  function handleUpdateTask(taskId: number) {
+    router.push(`/tasks/update/${taskId}`);
+
+  }
+
+  // function handleViewOffers(taskId: number) {
+  //   router.push("/offers/manage");
+  // }
+
   const fetchMyPostedTasks = async () => {
     try {
       const response = await axios.get("/tasks/user/posted");
@@ -86,33 +104,6 @@ export default function MyPostedTasksPage() {
                   </p>
                 </div>
 
-                {/* <div className="flex flex-wrap gap-4 mt-4 justify-end">
-                  {!task.completed && (
-                    <>
-                      <button
-                        onClick={() => {
-                          handleMarkComplete(task.id);
-                        }}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
-                      >
-                        Mark Complete
-                      </button>
-                      <button
-                        onClick={() => handleUpdateTask(task.id)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
-                      >
-                        Update Task
-                      </button>
-                      <button
-                        onClick={() => handleViewOffers(task.id)}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
-                      >
-                        View Offers
-                      </button>
-                    </>
-                  )}
-                </div> */}
-
                 <div className="flex flex-wrap gap-4 mt-4 justify-end">
                   {!task.completed && (
                     <>
@@ -156,7 +147,7 @@ export default function MyPostedTasksPage() {
                         </>
                       ) : (
                         <>
-                          {/* Default User buttons → Mark Complete, Update, View Offers */}
+                          {/* Default User buttons → Mark Complete, Update, View Offers
                           <button
                             onClick={() => {
                               handleMarkComplete(task.id);
@@ -164,19 +155,19 @@ export default function MyPostedTasksPage() {
                             className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
                           >
                             Mark Complete
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => handleUpdateTask(task.id)}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
                           >
                             Update Task
                           </button>
-                          <button
+                          {/* <button
                             onClick={() => handleViewOffers(task.id)}
                             className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition"
                           >
                             View Offers
-                          </button>
+                          </button> */}
 
                           <button
                             onClick={() =>
@@ -198,21 +189,4 @@ export default function MyPostedTasksPage() {
       </div>
     </main>
   );
-
-  function handleMarkComplete(taskId: number) {
-    try {
-      axios.post(`/tasks/${taskId}/complete\``).then(fetchMyPostedTasks);
-    } catch (err) {
-      console.error("Mark Complete error:", err);
-      setError("Failed to mark task as complete");
-    }
-  }
-
-  function handleUpdateTask(taskId: number) {
-    router.push(`/tasks/update/${taskId}`);
-  }
-
-  function handleViewOffers(taskId: number) {
-    router.push("/offers/manage");
-  }
 }

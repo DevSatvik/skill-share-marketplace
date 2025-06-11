@@ -179,3 +179,5 @@ const CreateTaskPage: FC = (): JSX.Element => {
     </main>
   );
 }
+
+export default CreateTaskPage;

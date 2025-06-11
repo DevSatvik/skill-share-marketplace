@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { FC, FormEvent, ChangeEvent, JSX } from "react";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
 
-export default function OffersPage() {
+const OffersPage : FC = () => {
   const { authToken, role } = useAuth();
   const axios = useAxios();
 
@@ -143,3 +144,5 @@ export default function OffersPage() {
     </main>
   );
 }
+
+export default OffersPage;
