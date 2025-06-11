@@ -49,7 +49,10 @@ const Navbar: FC<NavbarProps> = ({ children }) => {
                 </button>
 
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    router.push("/");
+                  }}
                   className="text-red-500 hover:text-red-600 transition"
                 >
                   Logout
