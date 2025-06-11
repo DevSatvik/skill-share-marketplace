@@ -72,8 +72,6 @@ For detailed database schema and backend test documentation, see:
 - [Backend Tests](backend/tests/README.md)
 
 ```
-
-```
 backend/
 ├── controllers/       # route handlers
 ├── routes/            # Express routers
