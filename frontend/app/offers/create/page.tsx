@@ -112,3 +112,5 @@ const CreateOfferPage: FC = (): JSX.Element => {
     )
   );
 }
+
+export default CreateOfferPage;

@@ -81,7 +81,7 @@ export default function HomePage() {
                   My Accepted Tasks
                 </button>
                 <button
-                  onClick={() => router.push("/offers/create")}
+                  onClick={() => router.push("/offers")}
                   className="px-6 py-3 bg-pink-600 text-white rounded-lg font-medium transition hover:bg-pink-700"
                 >
                   Make Offer

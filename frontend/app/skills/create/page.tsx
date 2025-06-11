@@ -149,3 +149,5 @@ const CreateSkillPage: FC = (): JSX.Element => {
     </main>
   );
 }
+
+export default CreateSkillPage;
