@@ -21,7 +21,6 @@ skill-share-marketplace/
 
 ## Pending Tasks 🚧
 
-- [ ] Implement **Update Skill** functionality for providers
 - [ ] Add **Frontend Tests** (unit & integration)
 - [ ] Improve overall **Styling** and **UI/UX** polish
 
