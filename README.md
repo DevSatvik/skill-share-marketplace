@@ -122,3 +122,22 @@ frontend/
 - **`npm run gen:api-types`** regenerates TS types from OpenAPI spec.
 
 ---
+
+## Swagger API Documentation
+
+The backend exposes Swagger UI for exploring the API. After you’ve started the server (via `npm run dev-backend` or in `npm run dev`), point your browser to:
+
+``` http://localhost:4000/api-docs ```
+
+
+Here you’ll get an interactive view of every endpoint, the request/response schemas.
+---
+
+## Prisma Studio
+
+For a graphical view into your database, Prisma Studio is your friend. From the repo root run:
+
+```bash
+npm run dev-backend   # if you haven’t already started the server
+npm --prefix backend exec prisma studio
+```
