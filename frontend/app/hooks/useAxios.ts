@@ -1,16 +1,16 @@
-import axiosInstance from "@/app/lib/axios"
+// useAxios.ts
+import type { AxiosInstance } from "axios";
+import axiosInstance from "@/app/lib/axios";
 import { useAuth } from "@/app/context/authContext";
 
-export const useAxios = () => {
+export const useAxios = (): AxiosInstance => {
   const { authToken } = useAuth();
 
-  const authAxios = axiosInstance;
-
   if (authToken) {
-    authAxios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
   } else {
-    delete authAxios.defaults.headers.common["Authorization"];
+    delete axiosInstance.defaults.headers.common["Authorization"];
   }
 
-  return authAxios;
+  return axiosInstance;
 };

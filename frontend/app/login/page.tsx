@@ -1,27 +1,33 @@
 "use client";
 
+import type { FormEvent, JSX } from "react";
+import type { LoginResponse } from "types/auth";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "../lib/axios";
 import { useAuth } from "../context/authContext";
 
-export default function LoginPage() {
+export default function LoginPage(): JSX.Element {
   const router = useRouter();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail]       = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError]       = useState<string>("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await axiosInstance.post("/login", { email, password });
+      const payload: LoginResponse = { email, password };
+      const response = await axiosInstance.post<LoginResponse>(
+        "/login",
+        payload
+      );
       login(response.data.authToken);
       router.push("/profile");
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed");
     }
@@ -37,7 +43,10 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email
               </label>
               <input
@@ -51,7 +60,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
               <input
@@ -64,7 +76,9 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
 
             <button
               type="submit"
