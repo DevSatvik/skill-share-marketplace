@@ -1,28 +1,31 @@
 "use client";
 
+import type { FC, FormEvent, JSX } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
+import { Task, GetOpenTasksResponse } from "@/app/types/tasks";
+import { Offer, GetMyOffersResponse } from "@/app/types/offers";
 
-export default function CreateOfferPage() {
+const CreateOfferPage: FC = (): JSX.Element => {
   const router = useRouter();
   const { authToken, role } = useAuth();
   const axios = useAxios();
 
-  const [allTasks, setAllTasks] = useState([]);
-  const [myOffers, setMyOffers] = useState([]);
-  const [selectedTaskId, setSelectedTaskId] = useState("");
-  const [error, setError] = useState("");
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [myOffers, setMyOffers] = useState<Offer[]>([]);
+  const [selectedTaskId, setSelectedTaskId] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     if (!authToken) return;
-    const fetchTasks = async () => {
+    const fetchTasks = async (): Promise<void> => {
       try {
         const [tasksResponse, offersResponse] = await Promise.all([
         // const response = await axios.get("/tasks/open");
-        axios.get("/tasks/open"),
-          axios.get("/offers/made-by-me"),
+        axios.get<GetOpenTasksResponse>("/tasks/open"),
+          axios.get<GetMyOffersResponse>("/offers/made-by-me"),
         // setTasks(response.data.tasks || []);
         ]);
 
@@ -32,16 +35,15 @@ export default function CreateOfferPage() {
         console.error("Fetch tasks error:", err);
         setError("Failed to fetch tasks");
       }
-
     };
 
     fetchTasks();
   }, [authToken, axios]);
 
-  const offeredTaskIds = new Set(myOffers.map((offer) => offer.taskId));
+  const offeredTaskIds = new Set<number>(myOffers.map((offer) => offer.taskId));
   const availableTasks = allTasks.filter((task) => !offeredTaskIds.has(task.id));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError("");
 

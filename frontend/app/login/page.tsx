@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent, JSX } from "react";
-import type { LoginResponse } from "types/auth";
+import type { LoginResponse } from "../types/auth";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "../lib/axios";
@@ -20,7 +20,7 @@ export default function LoginPage(): JSX.Element {
     setError("");
 
     try {
-      const payload: LoginResponse = { email, password };
+      const payload = { email, password };
       const response = await axiosInstance.post<LoginResponse>(
         "/login",
         payload
