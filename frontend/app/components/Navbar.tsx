@@ -1,7 +1,12 @@
 "use client";
 import { useAuth } from "@/app/context/authContext";
+import type { ReactNode, FC } from "react";
 
-function Navbar({ children }) {
+interface NavbarProps {
+  children: ReactNode;
+}
+
+const Navbar: FC<NavbarProps> = ({ children }) => {
   const { authToken, role, logout } = useAuth();
   const router = useAuth() ? require("next/navigation").useRouter() : null;
 
