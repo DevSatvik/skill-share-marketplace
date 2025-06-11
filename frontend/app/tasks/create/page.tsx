@@ -1,40 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import type { FC, FormEvent, ChangeEvent, JSX } from "react";
 import { useRouter } from "next/navigation";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
+import { CreateTaskPayload } from "@/app/types/tasks";
 
-export default function CreateTaskPage() {
+const CreateTaskPage: FC = (): JSX.Element => {
   const router = useRouter();
   const axios = useAxios();
   const { role } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateTaskPayload>({
     category: "GARDENING",
     taskName: "",
     taskDescription: "",
     expectedStartDate: "",
-    expectedHours: "",
-    hourlyRate: "",
+    expectedHours: 0,
+    hourlyRate: 0,
     currency: "USD",
   });
 
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
-    const payload = {
-      ...formData,
-      expectedHours: parseInt(formData.expectedHours, 10),
-      hourlyRate: parseFloat(formData.hourlyRate),
-    };
+    const payload = formData;
 
     try {
       await axios.post("/tasks", payload);

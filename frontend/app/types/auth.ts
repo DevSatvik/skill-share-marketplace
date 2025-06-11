@@ -12,3 +12,8 @@ export interface MeResponse {
 export interface LoginResponse {
   authToken: string;
 }
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}

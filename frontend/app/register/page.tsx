@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { FC, FormEvent, ChangeEvent, JSX } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "../lib/axios";
 import { useAuth } from "../context/authContext";
@@ -30,11 +31,11 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
+  const handleChange = (e : ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     try {

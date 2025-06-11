@@ -1,14 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { FC, FormEvent, ChangeEvent, JSX } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
+import type {
+  Task,
+  GetUserPostedTasksResponse,
+  CreateTaskPayload,
+} from "@/app/types/tasks";
+import type { Role } from "@/app/types/auth";
 
-export default function UpdateTaskPage() {
+const UpdateTaskPage: FC = (): JSX.Element => {
   const router = useRouter();
-  const params = useParams();
-  const taskId = params.id
+  // const params = useParams();
+  // const taskId = params.id
+  const { id: taskId } = useParams() as { id?: string };
 
   const axios = useAxios();
   const { authToken, role } = useAuth();
@@ -18,8 +26,8 @@ export default function UpdateTaskPage() {
     taskName: "",
     taskDescription: "",
     expectedStartDate: "",
-    expectedHours: "",
-    hourlyRate: "",
+    expectedHours: 0,
+    hourlyRate: 0,
     currency: "USD",
   });
 
@@ -31,7 +39,7 @@ export default function UpdateTaskPage() {
     const fetchTask = async () => {
       try {
         const response = await axios.get(`/tasks/user/posted`);
-        const task = response.data.tasks.find((t: any) => t.id === parseInt(taskId!));
+        const task = response.data.tasks.find((t: Task) => t.id === parseInt(taskId!));
         if (task) {
           setFormData({
             category: task.category,

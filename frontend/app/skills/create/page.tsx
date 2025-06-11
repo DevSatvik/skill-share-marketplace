@@ -1,40 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import type { FC, FormEvent, ChangeEvent, JSX } from "react";
 import { useRouter } from "next/navigation";
 import { useAxios } from "@/app/hooks/useAxios";
+import { CreateSkillPayload } from "@/app/types/skills";
 
-export default function CreateSkillPage() {
+const CreateSkillPage: FC = (): JSX.Element => {
   const router = useRouter();
   const axios = useAxios();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateSkillPayload>({
     category: "GARDENING",
-    experienceYears: "",
+    experienceYears: 0,
     workNature: "ONSITE",
-    hourlyRate: "",
+    hourlyRate: 0,
     currency: "USD",
   });
 
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
     try {
-      await axios.post("/skills", {
-        ...formData,
-        experienceYears: parseInt(formData.experienceYears, 10),
-        hourlyRate: parseFloat(formData.hourlyRate),
-      });
+      await axios.post("/skills", formData);
       router.push("/profile");
     } catch (err) {
       console.error("Create Skill error:", err);
