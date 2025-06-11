@@ -1,19 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type {FC, JSX } from "react";
 import { useAxios } from "@/app/hooks/useAxios";
 import { useAuth } from "@/app/context/authContext";
+import type { Offer, GetOffersOnUserTasksResponse } from "@/app/types/offers";
+import type { Role } from "@/app/types/auth";
 
-export default function ManageOffersPage() {
+const ManageOffersPage: FC = (): JSX.Element => {
   const { authToken, role } = useAuth();
   const axios = useAxios();
 
-  const [offers, setOffers] = useState<any[]>([]);
-  const [error, setError] = useState("");
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [error, setError] = useState<string>("");
 
-  const fetchOffers = async () => {
+  const fetchOffers = async (): Promise<void> => {
     try {
-      const response = await axios.get("/tasks/user/posted/offers");
+      const response = await axios.get<GetOffersOnUserTasksResponse>
+      ("/tasks/user/posted/offers");
       setOffers(response.data.offers || []);
     } catch (err) {
       console.error("Fetch Offers error:", err);
@@ -24,7 +28,7 @@ export default function ManageOffersPage() {
   useEffect(() => {
     if (!authToken) return;
     fetchOffers();
-  }, [authToken]);
+  }, [authToken, axios]);
 
   const handleRespond = async (offerId: number, action: string) => {
     try {
